@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #qrcode {
+            margin-top: 20px;
+        }
+        #charCount {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        #minVersion, #finalVersion, #capacityInfo {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Generator</h1>
+    <div id="capacityInfo"></div>
+    <input type="text" id="text" placeholder="Enter text to generate QR Code" oninput="updateCharCount()">
+    <select id="level" onchange="updateMinVersion()">
+        <option value="L">Error Correction Level L (7%)</option>
+        <option value="M">Error Correction Level M (15%)</option>
+        <option value="Q">Error Correction Level Q (25%)</option>
+        <option value="H">Error Correction Level H (30%)</option>
+    </select>
+    <input type="number" id="qrVersion" placeholder="Enter QR Code version (1-40)" value="1">
+    <input type="color" id="qrColor" value="#000000">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <div id="charCount">Character count: 0</div>
+    <div id="minVersion">Minimum QR Code version needed: 1</div>
+    <div id="finalVersion"></div>
+    <div id="qrcode"></div>
+
+    <script>
+        const capacities = {
+            L: [17, 32, 53, 78, 106, 134, 154],
+            M: [14, 28, 42, 62, 84, 106, 122],
+            Q: [11, 22, 34, 46, 60, 74, 86],
+            H: [7, 14, 24, 34, 44, 58, 64]
+        };
+
+        document.addEventListener("DOMContentLoaded", updateCapacityInfo);
+
+        function updateCharCount() {
+            const text = document.getElementById("text").value;
+            document.getElementById("charCount").textContent = "Character count: " + text.length;
+            updateMinVersion();
+        }
+
+        function updateMinVersion() {
+            const textLength = document.getElementById("text").value.length;
+            const level = document.getElementById("level").value;
+            let minVersion = 1;
+
+            if (textLength > 0) {
+                for (let i = 0; i < capacities[level].length; i++) {
+                    if (textLength <= capacities[level][i]) {
+                        minVersion = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById("minVersion").textContent = "Minimum QR Code version needed: " + minVersion;
+            updateCapacityInfo();
+        }
+
+        function updateCapacityInfo() {
+            let capacityTable = `<table>
+                <tr>
+                    <th>Version</th>
+                    <th>Error Correction Level L</th>
+                    <th>Error Correction Level M</th>
+                    <th>Error Correction Level Q</th>
+                    <th>Error Correction Level H</th>
+                    <th>QR Code Size (modules)</th>
+                </tr>`;
+            for (let i = 0; i < 7; i++) {
+                capacityTable += `<tr>
+                    <td>Version ${i + 1}</td>
+                    <td>${capacities.L[i]} characters</td>
+                    <td>${capacities.M[i]} characters</td>
+                    <td>${capacities.Q[i]} characters</td>
+                    <td>${capacities.H[i]} characters</td>
+                    <td>${(i + 1) * 4 + 17} modules</td>
+                </tr>`;
+            }
+            capacityTable += `</table>`;
+            document.getElementById("capacityInfo").innerHTML = capacityTable;
+        }
+
+        function generateQRCode() {
+            const text = document.getElementById("text").value;
+            const level = document.getElementById("level").value;
+            const color = document.getElementById("qrColor").value;
+            let version = parseInt(document.getElementById("qrVersion").value);
+
+            if (text.trim() === "") {
+                alert("Please enter text to generate the QR code.");
+                return;
+            }
+            if (isNaN(version) || version < 1 || version > 40) {
+                alert("Please enter a valid QR code version (1-40).");
+                return;
+            }
+
+            const qrcodeContainer = document.getElementById("qrcode");
+            qrcodeContainer.innerHTML = ""; // Clear previous QR code if any
+
+            let finalVersion = version;
+            try {
+                const qr = qrcode(version, level);
+                qr.addData(text);
+                qr.make();
+                const canvas = document.createElement("canvas");
+                canvas.width = canvas.height = qr.getModuleCount() * 1; // Set cell size to 1 to reduce border
+                const context = canvas.getContext("2d");
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = color;
+                for (let row = 0; row < qr.getModuleCount(); row++) {
+                    for (let col = 0; col < qr.getModuleCount(); col++) {
+                        if (qr.isDark(row, col)) {
+                            context.fillRect(col, row, 1, 1);
+                        }
+                    }
+                }
+                qrcodeContainer.appendChild(canvas);
+            } catch (e) {
+                alert("The specified version is too low for the given text and error correction level. Automatically adjusting the version.");
+                let adjustedVersion = version;
+                while (adjustedVersion <= 40) {
+                    try {
+                        const qr = qrcode(adjustedVersion, level);
+                        qr.addData(text);
+                        qr.make();
+                        const canvas = document.createElement("canvas");
+                        canvas.width = canvas.height = qr.getModuleCount() * 1;
+                        const context = canvas.getContext("2d");
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                        context.fillStyle = color;
+                        for (let row = 0; row < qr.getModuleCount(); row++) {
+                            for (let col = 0; col < qr.getModuleCount(); col++) {
+                                if (qr.isDark(row, col)) {
+                                    context.fillRect(col, row, 1, 1);
+                                }
+                            }
+                        }
+                        qrcodeContainer.appendChild(canvas);
+                        finalVersion = adjustedVersion;
+                        break;
+                    } catch (error) {
+                        adjustedVersion++;
+                    }
+                }
+                if (adjustedVersion > 40) {
+                    alert("The text is too long to be encoded even at the highest version.");
+                    return;
+                }
+            }
+
+            document.getElementById("finalVersion").textContent = "Final QR Code version used: " + finalVersion + ", Error Correction Level: " + level;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# 系統自動產生
+Thumbs.db
+.DS_Store
+
+# 暫存檔案
+*.log
+*.tmp
+
+# Node.js 依賴
+node_modules/
+
+# Python 虛擬環境
+venv/
+__pycache__/
+
+# 機密設定
+.env
