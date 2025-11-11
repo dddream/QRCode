@@ -6,36 +6,176 @@
     <title>QR Code Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
+        
+        h1 {
+            color: #ffffff;
+            margin: 30px 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="color"],
+        select,
+        button {
+            margin: 10px 5px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: white;
+            min-width: 250px;
+        }
+        
+        input[type="text"] {
+            min-width: 800px;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        input[type="color"] {
+            cursor: pointer;
+            width: 60px;
+            height: 46px;
+            padding: 5px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 12px 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
         #qrcode {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #qrcode canvas {
+            border: none;
+            transform: scale(3);
+            transform-origin: center;
+            margin: 20px;
+        }
+        
+        #charCount,
+        #minVersion,
+        #finalVersion {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+        
+        #finalVersion {
+            display: none;
+        }
+        
+        #errorMessage {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #ffffff;
+            background: rgba(245, 87, 108, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: none;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+        
+        #capacityInfo {
             margin-top: 20px;
-        }
-        #charCount {
-            margin-top: 10px;
             font-size: 14px;
-            color: #555;
+            color: #333;
         }
-        #minVersion, #finalVersion, #capacityInfo {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
+        
         table {
             margin: 20px auto;
             border-collapse: collapse;
-            width: 80%;
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
+        
         table, th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: none;
+            padding: 15px;
             text-align: center;
         }
+        
         th {
-            background-color: #f2f2f2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+        
+        td {
+            color: #495057;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -43,6 +183,7 @@
     <h1>QR Code Generator</h1>
     <div id="capacityInfo"></div>
     <input type="text" id="text" placeholder="Enter text to generate QR Code" oninput="updateCharCount()">
+    <br>
     <select id="level" onchange="updateMinVersion()">
         <option value="L">Error Correction Level L (7%)</option>
         <option value="M">Error Correction Level M (15%)</option>
@@ -52,8 +193,11 @@
     <input type="number" id="qrVersion" placeholder="Enter QR Code version (1-40)" value="1">
     <input type="color" id="qrColor" value="#000000">
     <button onclick="generateQRCode()">Generate QR Code</button>
+    <br>
     <div id="charCount">Character count: 0</div>
     <div id="minVersion">Minimum QR Code version needed: 1</div>
+    <div id="errorMessage"></div>
+    <br>
     <div id="finalVersion"></div>
     <div id="qrcode"></div>
 
@@ -120,18 +264,25 @@
             const level = document.getElementById("level").value;
             const color = document.getElementById("qrColor").value;
             let version = parseInt(document.getElementById("qrVersion").value);
+            const errorMessageDiv = document.getElementById("errorMessage");
+            
+            errorMessageDiv.style.display = "none";
+            errorMessageDiv.textContent = "";
 
             if (text.trim() === "") {
-                alert("Please enter text to generate the QR code.");
+                errorMessageDiv.textContent = "Please enter text to generate the QR code.";
+                errorMessageDiv.style.display = "inline-block";
                 return;
             }
             if (isNaN(version) || version < 1 || version > 40) {
-                alert("Please enter a valid QR code version (1-40).");
+                errorMessageDiv.textContent = "Please enter a valid QR code version (1-40).";
+                errorMessageDiv.style.display = "inline-block";
                 return;
             }
 
             const qrcodeContainer = document.getElementById("qrcode");
             qrcodeContainer.innerHTML = ""; // Clear previous QR code if any
+            qrcodeContainer.style.display = "inline-block";
 
             let finalVersion = version;
             try {
@@ -152,7 +303,8 @@
                 }
                 qrcodeContainer.appendChild(canvas);
             } catch (e) {
-                alert("The specified version is too low for the given text and error correction level. Automatically adjusting the version.");
+                errorMessageDiv.textContent = "The specified version is too low for the given text and error correction level. Automatically adjusting the version.";
+                errorMessageDiv.style.display = "inline-block";
                 let adjustedVersion = version;
                 while (adjustedVersion <= 40) {
                     try {
@@ -179,12 +331,15 @@
                     }
                 }
                 if (adjustedVersion > 40) {
-                    alert("The text is too long to be encoded even at the highest version.");
+                    errorMessageDiv.textContent = "The text is too long to be encoded even at the highest version.";
+                    errorMessageDiv.style.display = "inline-block";
                     return;
                 }
             }
 
-            document.getElementById("finalVersion").textContent = "Final QR Code version used: " + finalVersion + ", Error Correction Level: " + level;
+            const finalVersionDiv = document.getElementById("finalVersion");
+            finalVersionDiv.textContent = "Final QR Code version used: " + finalVersion + ", Error Correction Level: " + level;
+            finalVersionDiv.style.display = "inline-block";
         }
     </script>
 </body>
