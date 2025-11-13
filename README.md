@@ -4,7 +4,7 @@ A beautiful, modern QR code generator with a sleek gradient UI, real-time valida
 
 ## ✨ Features
 
-- **Beautiful Modern UI**: Stunning gradient design with smooth animations and transitions
+- **Beautiful Modern UI**: Stunning blue gradient design with smooth animations and transitions
 - **Real-time Character Counter**: Instantly see how many characters you've entered
 - **Smart Version Detection**: Automatic calculation of minimum required QR code version
 - **Error Correction Levels**: Support for all four levels (L, M, Q, H) with detailed capacity information
@@ -57,11 +57,12 @@ The app automatically recommends the minimum version needed based on your text l
 - **Final version used** shown after generation
 
 ### Visual Design
-- Gradient purple/blue background
+- Gradient blue background (#2980b9 to #1e5f8c)
 - Clean white input fields with hover effects
 - Semi-transparent info displays with backdrop blur
 - Smooth transitions and animations
 - 300% scaled QR code display with white background
+- Blue gradient button (#3498db to #2c3e50)
 
 ## 🛠️ Technical Details
 
@@ -90,8 +91,8 @@ Tested on: Chrome, Firefox, Safari, Edge
 ## 🎨 Customization
 
 The interface uses a beautiful gradient color scheme that can be easily customized in the CSS section:
-- Background: Purple to blue gradient (`#667eea` to `#764ba2`)
-- Button: Pink to red gradient (`#f093fb` to `#f5576c`)
+- Background: Blue gradient (`#2980b9` to `#1e5f8c`)
+- Button: Blue to dark gradient (`#3498db` to `#2c3e50`)
 - All colors are easily modifiable in the `<style>` section
 
 ---
